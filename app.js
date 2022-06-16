@@ -41,9 +41,8 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
 // 4) START SERVER
-const port = 3000;
-app.listen(port, ()=>{
-    console.log(`App running on port ${port}...`);
-})
+// server.js로 이동 했음
 
+
+module.exports = app;
 
