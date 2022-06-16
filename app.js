@@ -1,6 +1,8 @@
-const fs = require('fs');
 const express = require('express');
 const morgan = require('morgan');
+
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
@@ -15,138 +17,18 @@ app.use((req, res, next) => {
 })
     
 app.use((req, res, next)=>{
-    req.requestTime = new Date().toISOString();
+    var today = new Date();
+    var localeTime = new Date(today.setMinutes(today.getMinutes() - today.getTimezoneOffset()));
+    // console.log(localeTime.toISOString().slice(0, 19));
+    // req.requestTime = new Date().toISOString();
+    req.requestTime = localeTime.toISOString().slice(0, 19);
     next();
 })
 
-const tours = JSON.parse(
-    fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
 
 
 // 2) ROUTE HANDLERS
-const getAllTours = (req, res)=>{
-    console.log(req.requestTime);
-    res.status(200).json({
-        status : 'success',
-        requestedAt: req.requestTime,
-        results: tours.length,
-        data : {
-            tours
-        }
-    });
-};
 
-const getTour = (req, res)=>{
-    console.log(req.params);
-
-    const id = req.params.id * 1;
-
-    const tourLen = tours.length;
-    const tour = tours.find( el=> el.id === id);
-    // if(id > tourLen){
-    if(!tour){
-        return res
-        .status(404)
-        .json({
-            status: 'fail',
-            message:"Invalid Id"
-        })
-        
-    }
-
-    res.status(200).json({
-        status : 'success',
-        // results: tours.length,
-        data : {
-            tours: tour
-        }
-    });
-}
-
-const createTour = (req, res)=>{
-    // console.log(req.body);
-    const newId = tours[tours.length - 1].id + 1;
-    const newTour = Object.assign({id: newId}, req.body);
-
-    tours.push(newTour);
-
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err=>{
-        res.status(201).json({
-            status: 'success',
-            data: {
-                tour: newTour
-            }
-        })
-    })
-    // res.send('Done');
-}
-
-const updateTour = (req, res)=> {
-    if(req.params.id * 1 > tours.length){
-          return res
-          .status(404)
-          .json({
-              status: 'fail',
-              message:"Invalid Id"
-          })
-          
-      }
-
-  res.status(200).json({
-      status: 'success',
-      data: {
-          tour : '<Updated outr here...>'
-      }
-  })
-};
-
-const deleteTour = (req, res)=> {
-    if(req.params.id * 1 > tours.length){
-          return res
-          .status(404)
-          .json({
-              status: 'fail',
-              message:"Invalid Id"
-          })
-          
-      }
-
-  res.status(204).json({
-      status: 'success',
-      data: null
-  })
-}
-function getAllUsers(req, res){
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet definde!'
-    });
-};
-const createUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet definde!'
-    });
-};
-const getUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet definde!'
-    });
-};
-const updateUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet definde!'
-    });
-};
-const deleteUser = (req, res) => {
-    res.status(500).json({
-        status: 'error',
-        message: 'This route is not yet definde!'
-    });
-};
 // app.get('/api/v1/tours', getAllTours);
 // app.get('/api/v1/tours/:id', getTour);
 // app.post('/api/v1/tours', createTour);
@@ -155,32 +37,8 @@ const deleteUser = (req, res) => {
 
 // 3)ROUTES
 
-
-const tourRouter = express.Router();
-const userRouter = express.Router();
-
-
-
-tourRouter.route('/')
-    .get(getAllTours)
-    .post(createTour);
-
-tourRouter.route('/:id')
-    .get(getTour)
-    .patch(updateTour)
-    .delete(deleteTour);
-
-userRouter.route('/')
-    .get(getAllUsers)
-    .post(createUser);
-
-userRouter.route('/:id')
-    .get(getUser)
-    .patch(updateUser)
-    .delete(deleteUser);
-
-    app.use('/api/v1/tours', tourRouter);
-    app.use('/api/v1/users', userRouter);
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
 
 // 4) START SERVER
 const port = 3000;
