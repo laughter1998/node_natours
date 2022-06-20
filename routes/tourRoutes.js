@@ -9,7 +9,7 @@ router.param('id', tourController.checkID);
 // Create a checkBody middleware
 // Check if body contains the name and price property
 // If notify, send back 400 (bad request)
-
+// laughter98 브런치 만들 기
 router.route('/')
 .get(tourController.getAllTours)
 .post( tourController.checkBody, tourController.createTour);
