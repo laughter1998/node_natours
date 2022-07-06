@@ -2,6 +2,13 @@
 // const { findById } = require('../models/tourModel');
 const Tour = require('../models/tourModel');
 
+exports.aliasTopTours = (req, res, next) => {
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,prcie,ratingsAverage,summary,difficulty';
+    next();
+};
+
 // const tours = JSON.parse(
 //     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
@@ -36,6 +43,7 @@ exports.getAllTours = async (req, res)=>{
     // console.log(req.requestTime);
     try{
         // 1A) Filtering
+       
         const queryObj = {...req.query};
         const excludeFields = ['page', 'sort', 'limit', 'fields'];
         excludeFields.forEach(el => delete queryObj[el]);
@@ -43,9 +51,7 @@ exports.getAllTours = async (req, res)=>{
         // 1B) Advanced filterging
         // console.log(req.query, queryObj);
         let queryStr = JSON.stringify(queryObj);
-        console.log(queryStr);
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-        console.log(JSON.parse(queryStr));
         // {
         //     difficulty : 'easy',
         //     duration: {$gte: 5}
@@ -63,7 +69,6 @@ exports.getAllTours = async (req, res)=>{
         // 2) Sorting
         if(req.query.sort) {
             const sortBy = req.query.sort.split(',').join(' ');
-            console.log(sortBy);
             query = query.sort(sortBy);
             // sort('price ratingAverage')
         } else {
@@ -72,7 +77,6 @@ exports.getAllTours = async (req, res)=>{
 
         // 3) Field limiting
         if(req.query.fields){
-            console.log("1");
             const fields = req.query.fields.split(',').join(' ');
             query = query.select(fields);
         } else {
@@ -81,17 +85,11 @@ exports.getAllTours = async (req, res)=>{
 
         // 4) Pagination
         // page=2&limit=10
-        function findCallBack (err, docs) {
-            console.log("1");
-          }
-
+      
             const page = req.query.page * 1 || 1;
             const limit = req.query.limit * 1 || 100;
-            // const skip =  (page - 1) * limit;
-            const skip =  Number(6);
-            console.log(page);
-            console.log(limit);
-            console.log(typeof skip);
+            const skip =  (page - 1) * limit;
+            // const skip =  Number(6);
             query = query.skip(skip).limit(limit);
 
             if(req.query.page){

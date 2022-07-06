@@ -10,6 +10,9 @@ const router = express.Router();
 // Check if body contains the name and price property
 // If notify, send back 400 (bad request)
 
+router.route('/top-5-cheap')
+.get(tourController.aliasTopTours, tourController.getAllTours)
+// limit=5&sort=-ratingsAverage,price
 router.route('/')
 .get(tourController.getAllTours)
 .post( tourController.createTour);
