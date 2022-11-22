@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'A tour must have a name'],
         unique: true,
-        trim: true
+        trim: true,
+        maxlength: [40, 'A tour name must have less or equal then 40 characters'],
+        minlength: [10, 'A tour name must have more or equal then 10 characters']
+        // validate: [validator.isAlpha, 'Tour name must only contain characters']
     },
     slug: String,
     duration: {
@@ -20,12 +24,17 @@ const tourSchema = new mongoose.Schema({
     },
     difficulty: {
         type: String,
-        required: [true, 'A tour must have a difficulty']
-
+        required: [true, 'A tour must have a difficulty'],
+        enum: {
+            values: ['easy', 'medium', 'difficult'],
+            message: 'Difficulty is either: easy, medium, difficult'
+        }
     },
     ratingsAverage: {
         type: Number,
-        default: 4.5
+        default: 4.5,
+        min: [1, 'Ration must be above 1.0'],
+        max: [5, 'Rating must be below 5.0']
     },
     ratingsQuantity: {
         type: Number,
@@ -35,7 +44,18 @@ const tourSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'A tour must have a name']
     },
-    priceDiscount: Number,
+    priceDiscount: {
+        type: Number,
+        // 업데이트에는 this 가 적용안됨
+        // this only points to current doc on NEW document creation
+        validate: {
+            validator:  function(val){
+                return val < this.price; //100 < 200
+            },
+            message: 'Discount price ({VALUE}) should be below regular price'
+        }
+       
+    },
     summary: {
         type: String,
         trim: true,
@@ -73,6 +93,7 @@ tourSchema.virtual('durationWeeks').get(function(){
     return this.duration / 7
 });
 
+//이 DOCUMENT MIDDLEWARE는 실제로 저장 및 생성을 위해서만 실행되지만 업데이트를 위해서는 실행되지 않는다고 말한 것을 기억하십시오
 // DOCUMENT MIDDLEWARE: runs before .save() and .create() //save 와 create에서만 this를 사용할 수 있음????
 tourSchema.pre('save', function(next) {
     this.slug = slugify(this.name, {lower: true});
