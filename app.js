@@ -21,11 +21,12 @@ app.use((req, res, next) => {
 })
     
 app.use((req, res, next)=>{
-    var today = new Date();
-    var localeTime = new Date(today.setMinutes(today.getMinutes() - today.getTimezoneOffset()));
+    //var today = new Date();
+    //var localeTime = new Date(today.setMinutes(today.getMinutes() - today.getTimezoneOffset()));
     // console.log(localeTime.toISOString().slice(0, 19));
-    // req.requestTime = new Date().toISOString();
-    req.requestTime = localeTime.toISOString().slice(0, 19);
+    //req.requestTime = localeTime.toISOString().slice(0, 19);
+    req.requestTime = new Date().toISOString();
+    // console.log(req.headers);
     next();
 })
 

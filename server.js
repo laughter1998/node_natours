@@ -12,7 +12,7 @@ mongoose.connect(DB).then(() => console.log('DB connection successful!😁'));
 
 // const testTour = new Tour({
 //     name: 'The Park Camper',
-//     price: 997
+//     price: 997 
 // });
 // testTour.save().then(doc => {
 //     console.log(doc);
